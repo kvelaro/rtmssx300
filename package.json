@@ -1,0 +1,23 @@
+{
+  "name": "rtmssx300",
+  "version": "1.0.1",
+  "description": "RTMS SX300 nodejs library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/kvelaro/rtmssx300.git"
+  },
+  "keywords": [
+    "RTMS",
+    "SX-300"
+  ],
+  "author": "Kamil Velaro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kvelaro/rtmssx300/issues"
+  },
+  "homepage": "https://github.com/kvelaro/rtmssx300#readme"
+}
