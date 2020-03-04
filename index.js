@@ -554,7 +554,7 @@ let privateMethods = {
                     break;
                 case '10': //Data frame: Volume
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -564,7 +564,7 @@ let privateMethods = {
                     break;
                 case '11': //Data frame: Occupancy
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -574,7 +574,7 @@ let privateMethods = {
                     break;
                 case '12': //Data frame: Speed
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -584,7 +584,7 @@ let privateMethods = {
                     break;
                 case '13': //Data frame: Gap
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -594,7 +594,7 @@ let privateMethods = {
                     break;
                 case '14': //Data frame: Vehicle class C1
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -607,7 +607,7 @@ let privateMethods = {
                     break;
                 case '15': //Data frame: Vehicle class C2
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -620,7 +620,7 @@ let privateMethods = {
                     break;
                 case '16': //Data frame: Vehicle class C3
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -633,7 +633,7 @@ let privateMethods = {
                     break;
                 case '17': //Data frame: Vehicle class C4
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -646,7 +646,7 @@ let privateMethods = {
                     break;
                 case '18': //Data frame: Vehicle class C5
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -659,7 +659,7 @@ let privateMethods = {
                     break;
                 case '1E': //Data frame: Headway
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
@@ -669,7 +669,7 @@ let privateMethods = {
                     break;
                 case '1F': //Data frame: Speed_85
                     dataCountFrame = parseInt((message[6] + message[7]), 16);
-                    dataFrame = message.substring(8, message.length - 4);
+                    dataFrame = message.substring(12, message.length - 4);
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
