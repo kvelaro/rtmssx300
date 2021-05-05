@@ -27,6 +27,23 @@ let requestMethods = {
         }
         privateMethods.send(params.host, params.port, frame, expectedResponseFunction, params.returnRaw, params.cb)
     },
+    clearMemoryRequest: (options) => {
+        const expectedResponseFunction = '1C';
+        let params = {...this.defaults, ...options};
+        const RTCREQUEST = '51';
+        const DATALENGTH = '02';
+        let data = params.sensorID.toString(16).padStart(4, '0');
+        let checksum = privateMethods.makeChecksum(data)
+        frame = Buffer.from(constants.MESSAGE_HEADER + RTCREQUEST + DATALENGTH + data + checksum, 'hex')
+        if(!params.execute) {
+            if(params.cb != null) {
+                params.cb(null, frame);
+                return;
+            }
+            return frame;
+        }
+        privateMethods.send(params.host, params.port, frame, expectedResponseFunction, params.returnRaw, params.cb)
+    },
     rtcRetrieveRequest: (options) => {
         const expectedResponseFunction = '49';
         let params = {...this.defaults, ...options};
@@ -128,11 +145,11 @@ let requestMethods = {
         }
         messageComposition |= Math.pow(2, 1)
         messageComposition |= Math.pow(2, 0)
-        
+
         data += privateMethods.convert1016(messageComposition);
-        
+
         let ser1Flags = obj.serFlagsByte
-        
+
         if(obj.serProtocol == 'X3') {
             ser1Flags |= Math.pow(2, 7)
         }
@@ -204,7 +221,6 @@ let requestMethods = {
         privateMethods.send(params.host, params.port, frame, expectedResponseFunction, params.returnRaw, params.cb)
     },
     dataByMemoryRequest: (options) => {
-        console.log(options)
         const expectedResponseFunction = '80';
         let params = {...this.defaults, ...options};
         if(!params.startTime || !params.endTime) {
@@ -246,54 +262,66 @@ let privateMethods = {
             host: host,
             port: port,
         }, function () {
-            console.log('Client connected');
+            console.log('Client connected')
             client.write(frame, () => {
+                console.log("Data to send")
+                console.log(frame)
                 console.log('Data has been successfully sent')
             })
         });
-        client.setTimeout(100000, (e) => {
-            client.end();
-            return;
+        //todo for now 60 secs
+        client.setTimeout(60000, (e) => {
+            //console.log('timeout in action, 60 secs')
+            client.destroy(new Error('Timeout in action, 60 secs'))
         });
         client.on('data', function (data) {
             console.log(data)
             let pieceOfData = Buffer.from(data)
-            buf = Buffer.concat([buf, pieceOfData]);
-            setTimeout(() => {
-                client.end();
-            }, 10000)
+            buf = Buffer.concat([buf, pieceOfData])
+            let interval = setInterval(() => {
+                if(buf.length > 100) {
+                    clearInterval(interval)
+                    client.end()
+                }
+            }, 5000)
         });
         client.on('error', (e) => {
-            console.log('-----------------WTF-------------')
-            client.end();
-            cb(e, null);
-            return;
+            cb(e)
         });
         client.on('end', function () {
             client.destroy();
             console.log('client disconnected');
-            if (expectedResponseFunction != privateMethods.getIdentity(buf)) {
-                cb(new Error('Датчик вернул неожидаемый ответ'));
+            if(buf.length == 0) {
+                cb(new Error('Датчик ничего не вернул'));
+                return;
+            }
+            let handlerFunctionFound = false
+            let messages = privateMethods.messages(buf);
+            messages.forEach(message => {
+                if (expectedResponseFunction == privateMethods.getIdentityFromString(message)) {
+                    handlerFunctionFound = true
+                }
+            })
+            if (handlerFunctionFound == false) {
+                cb(new Error('Датчик вернул неправильный ответ'));
                 return;
             }
             if (returnRaw) {
                 cb(null, buf);
             }
             else {
-                privateMethods.parse(buf, cb);
+                privateMethods.parse(buf, expectedResponseFunction, cb);
             }
             return;
         });
     },
-    parse: (rawData, cb) => {
-        //@todo is header correct?
-        let functionIdentity = privateMethods.getIdentity(rawData);
-        let functionName = `res${functionIdentity}`;
+    parse: (rawData, expectedResponseFunction, cb) => {
+        let functionName = `res${expectedResponseFunction}`;
         if(!privateMethods.hasOwnProperty(functionName)) {
             cb(new Error(`Не найден обработчик ${functionName} ответа`));
             return;
         }
-        privateMethods[functionName](rawData, cb);
+        return privateMethods[functionName](rawData, cb);
     },
     getIdentity: (rawData) => {
         return rawData[2].toString(16).toUpperCase()
@@ -339,7 +367,7 @@ let privateMethods = {
         return sum.toString(16).padStart(4, '0');
     },
     messages: (rawData) => {
-        
+
         let strArr = [];
         let str = rawData.toString('hex').toUpperCase();
         let startIndex = 0;
@@ -435,8 +463,8 @@ let privateMethods = {
         ser1.ser1Mode = (ser1Flags & Math.pow(2, 5)) ? '485' : '232'
         ser1.ser1PerVehicle = (ser1Flags & Math.pow(2, 4)) ? true : false
         ser1.ser1NormalMode = (ser1Flags & Math.pow(2, 3)) ? true : false
-        ser1.ser1StatMode = ((ser1Flags & Math.pow(2, 2)) && obj.ser1NormalMode == true) ? true : false
-        ser1.ser1PollMode = ((ser1Flags & Math.pow(2, 1) == 0) && obj.ser1StatMode == true) ? true : false
+        ser1.ser1StatMode = (ser1Flags & Math.pow(2, 2)) ? true : false
+        ser1.ser1PollMode = (ser1Flags & Math.pow(2, 1)) ? true : false
 
         ser1.ser1BaudByte =  message[28].toString() + message[29].toString()
 
@@ -448,14 +476,14 @@ let privateMethods = {
         ser2.ser1Mode = (ser2Flags & Math.pow(2, 5)) ? '485' : '232'
         ser2.ser1PerVehicle = (ser2Flags & Math.pow(2, 4)) ? true : false
         ser2.ser1NormalMode = (ser2Flags & Math.pow(2, 3)) ? true : false
-        ser2.ser1StatMode = ((ser2Flags & Math.pow(2, 2)) && obj.ser2NormalMode == true) ? true : false
-        ser2.ser1PollMode = ((ser2Flags & Math.pow(2, 1) == 0) && obj.ser2StatMode == true) ? true : false
+        ser2.ser1StatMode = (ser2Flags & Math.pow(2, 2)) ? true : false
+        ser2.ser1PollMode = (ser2Flags & Math.pow(2, 1)) ? true : false
 
         ser2.ser2BaudByte = message[32].toString() + message[33].toString()
 
         obj.serFlagsByte = ser1.ser1FlagsByte
         obj.serProtocol = ser1.ser1Protocol
-        obj.serHOccupancy = ser1.serHOccupancy
+        obj.serHOccupancy = ser1.ser1HOccupancy
         obj.serMode = ser1.ser1Mode
         obj.serPerVehicle = ser1.ser1PerVehicle
         obj.serNormalMode = ser1.ser1NormalMode
@@ -473,7 +501,7 @@ let privateMethods = {
 
         let rsvd =
             message[42].toString() + message[43].toString()
-            message[44].toString() + message[45].toString()
+        message[44].toString() + message[45].toString()
         obj.rsvd = rsvd
         cb(null, obj)
         return;
@@ -489,18 +517,16 @@ let privateMethods = {
             }
         });
 
-        if(messages.length == 1) {
-            let message = messages.pop();
-            identity = privateMethods.getIdentityFromString(message)
-            if(identity == constants.RESPONSE_CODE_ACK) {
-                cb(null, {});
-                return;
-            }
-            else {
-                cb(new Error(constants.ERROR_MESSAGE_HEADER_FRAME_NOT_AS_EXPECTED), null);
-                return;
-            }
-        }        
+        let message = messages.pop();
+        identity = privateMethods.getIdentityFromString(message)
+        if(identity == constants.RESPONSE_CODE_ACK) {
+            cb(null, {});
+            return;
+        }
+        else {
+            cb(new Error(constants.ERROR_MESSAGE_HEADER_FRAME_NOT_AS_EXPECTED), null);
+            return;
+        }
     },
     res49: (rawData, cb) => {
         let identity = '';
@@ -543,12 +569,12 @@ let privateMethods = {
                     let statFlags = privateMethods.convert1610(message[18].toString() + message[19].toString())
                     obj.measurementType = (statFlags & Math.pow(2, 0)) ? 'MPH' : 'km/h'
                     let date = '20' + //@todo
-                    message[32].toString() + message[33].toString() + "-" +
-                    message[30].toString() + message[31].toString() + "-" +
-                    message[28].toString() + message[29].toString() + " " +
-                    message[24].toString() + message[25].toString() + ":" +
-                    message[22].toString() + message[23].toString() + ":" +
-                    message[20].toString() + message[21].toString()
+                        message[32].toString() + message[33].toString() + "-" +
+                        message[30].toString() + message[31].toString() + "-" +
+                        message[28].toString() + message[29].toString() + " " +
+                        message[24].toString() + message[25].toString() + ":" +
+                        message[22].toString() + message[23].toString() + ":" +
+                        message[20].toString() + message[21].toString()
                     obj.date = new Date(date)
                     obj.customdate = dateFormatted.getFormatted(obj.date)
                     break;
@@ -578,6 +604,9 @@ let privateMethods = {
                     zoneData = [];
                     for(let i = 0; i < dataFrame.length; i+= 4) {
                         totalForZone = parseInt((dataFrame[i] + dataFrame[i + 1] + dataFrame[i + 2] + dataFrame[i + 3]), 16)
+                        if(totalForZone == 240) {
+                            totalForZone = 0
+                        }
                         zoneData.push(totalForZone)
                     }
                     obj.speed = zoneData
@@ -679,6 +708,19 @@ let privateMethods = {
                     break;
                 case '81': //Footer frame
                     //no information needed from this frame
+                    //@todo
+                    obj['class'][0] = []
+                    for(let i = 1; i < obj['class'].length; i++) {
+                        for(let j = 0; j < obj['class'][1].length; j++) {
+                            if(obj['class'][0][j] == undefined) {
+                                obj['class'][0][j] = 0
+                            }
+                            obj['class'][0][j] += obj['class'][i][j]
+                        }
+                    }
+                    for(let i = 0; i < obj['volume'].length; i++) {
+                        obj['class'][0][i] = obj['volume'][i] - obj['class'][0][i]
+                    }
                     data.push(obj)
                     break;
                 case '1C': //messages separator
