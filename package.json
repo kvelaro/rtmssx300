@@ -1,5 +1,6 @@
 {
   "name": "rtmssx300",
+  "version": "1.1.1",
   "description": "RTMS SX300 nodejs library",
   "main": "index.js",
   "scripts": {
