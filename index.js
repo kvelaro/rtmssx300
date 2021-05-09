@@ -1,6 +1,6 @@
 var net = require('net');
 var constants = require('./constants');
-var dateFormatted = require('./date');
+let moment = require('moment')
 let requestMethods = {
     defaults: {
         sensorid: 1,
@@ -67,20 +67,8 @@ let requestMethods = {
         const RTCREQUEST = '49';
         const DATALENGTH = '10';
         let data = params.sensorID.toString(16).padStart(4, '0');
-        data += dateFormatted.getSeconds(options.startTime)
-        data += dateFormatted.getMinutes(options.startTime)
-        data += dateFormatted.getHours(options.startTime)
-        data += dateFormatted.getDay(options.startTime)
-        data += dateFormatted.getDate(options.startTime)
-        data += dateFormatted.getMonth(options.startTime)
-        data += dateFormatted.getYear(options.startTime)
-        data += dateFormatted.getSeconds(options.resetTime)
-        data += dateFormatted.getMinutes(options.resetTime)
-        data += dateFormatted.getHours(options.resetTime)
-        data += dateFormatted.getDay(options.resetTime)
-        data += dateFormatted.getDate(options.resetTime)
-        data += dateFormatted.getMonth(options.resetTime)
-        data += dateFormatted.getYear(options.resetTime)
+        data += moment(options.startTime).format('ssmmHH0dDDMMYY')
+        data += moment(options.resetTime).format('ssmmHH0dDDMMYY')
         let checksum = privateMethods.makeChecksum(data)
         frame = Buffer.from(constants.MESSAGE_HEADER + RTCREQUEST + DATALENGTH + data + checksum, 'hex')
         if(!params.execute) {
@@ -230,18 +218,8 @@ let requestMethods = {
         const SETUPINFO = '68';
         const DATALENGTH = '0E';
         let data = params.sensorID.toString(16).padStart(4, '0');
-        data += dateFormatted.getSeconds(options.startTime);
-        data += dateFormatted.getMinutes(options.startTime);
-        data += dateFormatted.getHours(options.startTime);
-        data += dateFormatted.getDate(options.startTime);
-        data += dateFormatted.getMonth(options.startTime);
-        data += dateFormatted.getYear(options.startTime);
-        data += dateFormatted.getSeconds(options.endTime);
-        data += dateFormatted.getMinutes(options.endTime);
-        data += dateFormatted.getHours(options.endTime);
-        data += dateFormatted.getDate(options.endTime);
-        data += dateFormatted.getMonth(options.endTime);
-        data += dateFormatted.getYear(options.endTime);
+        data += moment(options.startTime).format('ssmmHHDDMMYY')
+        data += moment(options.endTime).format('ssmmHHDDMMYY')
         let checksum = privateMethods.makeChecksum(data);
         frame = Buffer.from(constants.MESSAGE_HEADER + SETUPINFO + DATALENGTH + data + checksum, 'hex');
         if(!params.execute) {
@@ -576,7 +554,7 @@ let privateMethods = {
                         message[22].toString() + message[23].toString() + ":" +
                         message[20].toString() + message[21].toString()
                     obj.date = new Date(date)
-                    obj.customdate = dateFormatted.getFormatted(obj.date)
+                    obj.customdate = moment(date).format('YYYY-MM-DD HH:mm:ss')
                     break;
                 case '10': //Data frame: Volume
                     dataCountFrame = parseInt((message[6] + message[7]), 16);

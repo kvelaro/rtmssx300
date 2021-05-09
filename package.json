@@ -1,6 +1,6 @@
 {
   "name": "rtmssx300",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "RTMS SX300 nodejs library",
   "main": "index.js",
   "scripts": {
@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/kvelaro/rtmssx300/issues"
   },
-  "homepage": "https://github.com/kvelaro/rtmssx300#readme"
+  "homepage": "https://github.com/kvelaro/rtmssx300#readme",
+  "dependencies": {
+    "moment": "^2.29.1"
+  }
 }
