@@ -380,10 +380,6 @@ let privateMethods = {
         }
         //Data in length control
         pieceReceived = rawData[3].toString(16).toUpperCase();
-        if(pieceReceived != '12') {
-            cb(new Error('Длина данных неправильная'), null);
-            return;
-        }
         //sensorID
         pieceReceived = parseInt((rawData[4].toString(16) + rawData[5].toString(16)), 16);
         obj.sensorid = pieceReceived;
