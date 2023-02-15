@@ -689,6 +689,10 @@ let privateMethods = {
                             if(obj['class'][0][j] == undefined) {
                                 obj['class'][0][j] = 0
                             }
+                            //incorrect data
+                            if(obj['class'][i][j] > obj['volume'][j]) {
+                                obj['class'][i][j] = 0
+                            }
                             obj['class'][0][j] += obj['class'][i][j]
                         }
                     }
