@@ -350,7 +350,7 @@ let privateMethods = {
         let str = rawData.toString('hex').toUpperCase();
         let startIndex = 0;
         let endIndex = 0;
-        let failsaveBreak = 100; //@todo total message count per request
+        let failsaveBreak = 2000; //@todo total message count per request
         let running = true;
         while(running) {
             startIndex = str.indexOf(constants.MESSAGE_HEADER, startIndex);
